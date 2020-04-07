@@ -11,7 +11,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.edenh.newsclient.R
 import com.edenh.newsclient.model.Article
 
-class ArticlesAdapter(private val articlesData: List<Article>) :
+class ArticlesAdapter(var articlesData: List<Article>) :
     RecyclerView.Adapter<ArticlesAdapter.ArticleViewHolder>() {
 
     private val requestOptions: RequestOptions = RequestOptions()
@@ -29,13 +29,12 @@ class ArticlesAdapter(private val articlesData: List<Article>) :
         holder.title.text = article.title
         holder.description.text = article.description
         holder.authorAndPublishDate.text = holder.authorAndPublishDate.context
-            .getString(R.string.author_date_template, article.author, article.publishDate)
-
+            .getString(R.string.author_date_template, article.author, article.publishedAt)
 
 
         Glide.with(holder.coverImage.context)
             .applyDefaultRequestOptions(requestOptions)
-            .load(article.imageUrl)
+            .load(article.urlToImage)
             .into(holder.coverImage)
     }
 
