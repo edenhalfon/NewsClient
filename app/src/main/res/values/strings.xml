@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">News Client</string>
+    <string name="author_date_template">%1$s | %2$s</string>
+</resources>
