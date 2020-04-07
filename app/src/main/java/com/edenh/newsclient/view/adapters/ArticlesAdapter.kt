@@ -1,5 +1,7 @@
 package com.edenh.newsclient.view.adapters
 
+import android.content.Intent
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +12,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.edenh.newsclient.R
 import com.edenh.newsclient.model.Article
+import com.edenh.newsclient.utils.INTENT_ARTICLE_URL
+import com.edenh.newsclient.view.ArticleActivity
 
 class ArticlesAdapter(var articlesData: List<Article>) :
     RecyclerView.Adapter<ArticlesAdapter.ArticleViewHolder>() {
@@ -28,14 +32,24 @@ class ArticlesAdapter(var articlesData: List<Article>) :
         val article = articlesData[position]
         holder.title.text = article.title
         holder.description.text = article.description
-        holder.authorAndPublishDate.text = holder.authorAndPublishDate.context
-            .getString(R.string.author_date_template, article.author, article.publishedAt)
 
+        if (TextUtils.isEmpty(article.author)) {
+            holder.authorAndPublishDate.text = article.publishedAt
+        } else {
+            holder.authorAndPublishDate.text = holder.authorAndPublishDate.context
+                .getString(R.string.author_date_template, article.author, article.publishedAt)
+        }
 
         Glide.with(holder.coverImage.context)
             .applyDefaultRequestOptions(requestOptions)
             .load(article.urlToImage)
             .into(holder.coverImage)
+
+        holder.itemView.setOnClickListener() {
+            val articleIntent = Intent(holder.itemView.context, ArticleActivity::class.java)
+            articleIntent.putExtra(INTENT_ARTICLE_URL, article.url);
+            holder.itemView.context.startActivity(articleIntent)
+        }
     }
 
     override fun getItemCount(): Int {
