@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
     //Components
     private var adapter: ArticlesAdapter? = null
 
-    private var articlesViewModel: ArticlesViewModel? = null
+    private lateinit var articlesViewModel: ArticlesViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        articlesViewModel?.fetchArticles()
+        articlesViewModel.fetchArticles()
     }
 
     private fun initComponents() {
@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViewModel() {
         articlesViewModel = ViewModelProvider(this).get(ArticlesViewModel::class.java)
-        articlesViewModel?.getArticlesLiveData()?.observe(this, Observer {
+        articlesViewModel.getArticlesLiveData().observe(this, Observer {
             if (it != null) {
                 articlesLoader?.visibility = View.GONE
                 articlesList?.visibility = View.VISIBLE
@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        articlesViewModel?.getErrorLiveData()?.observe(this, Observer {
+        articlesViewModel.getErrorLiveData()?.observe(this, Observer {
             articlesLoader?.visibility = View.GONE
             articlesList?.visibility = View.GONE
 

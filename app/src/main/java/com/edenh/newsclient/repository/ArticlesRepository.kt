@@ -2,47 +2,51 @@ package com.edenh.newsclient.repository
 
 import android.util.Log
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.MediatorLiveData
+import com.edenh.newsclient.model.Article
 import com.edenh.newsclient.network.response.ArticlesResponse
 import com.edenh.newsclient.network.retrofit.ApiRequest
 import com.edenh.newsclient.network.retrofit.RetrofitRequest
-import com.edenh.newsclient.utils.API_KEY
-import com.edenh.newsclient.utils.GENERAL_FAILURE
-import com.edenh.newsclient.utils.NETWORK_FAILURE
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.edenh.newsclient.utils.ARTICLES_SOURCE
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class ArticlesRepository {
-    private val TAG: String = javaClass.simpleName
+class ArticlesRepository(private val articleDao: ArticleDao) {
     private val apiRequest = RetrofitRequest.retrofit.create(ApiRequest::class.java)
 
+    fun getArticles(): LiveData<ArticlesResponse?> {
+        val data: MediatorLiveData<ArticlesResponse?> = MediatorLiveData()
+        val articles: LiveData<List<Article>> = articleDao.getArticles()
+        data.addSource(articles) {
+            if (it != null) {
+                val response = ArticlesResponse("ok", it.size, it)
+                data.postValue(response)
+            }
+        }
+        fetchAndInsertArticles()
 
-    fun getArticles(source: String?): LiveData<ArticlesResponse?> {
-        val data: MutableLiveData<ArticlesResponse?> = MutableLiveData()
-        apiRequest.getArticles(source, API_KEY).enqueue(object : Callback<ArticlesResponse?> {
-                override fun onResponse(
-                    call: Call<ArticlesResponse?>,
-                    response: Response<ArticlesResponse?>
-                ) {
-                    Log.d(TAG, "onResponse: $response")
-                    if (response.body() != null) {
-                        data.postValue(response.body())
-                    } else {
-                        val failureResponse = ArticlesResponse(GENERAL_FAILURE)
-                        data.postValue(failureResponse)
-                    }
-                }
-
-                override fun onFailure(
-                    call: Call<ArticlesResponse?>,
-                    t: Throwable
-                ) {
-                    val failureResponse = ArticlesResponse(NETWORK_FAILURE)
-                    data.postValue(failureResponse)
-                }
-            })
         return data
+    }
+
+    private fun fetchAndInsertArticles() {
+        val scope = CoroutineScope(Dispatchers.IO)
+        scope.launch {
+            try {
+                val articleResponse = apiRequest.getArticles(ARTICLES_SOURCE)
+                if (articleResponse != null) {
+                    insertToDb(articleResponse.articles)
+                }
+            } catch (throwable: Throwable) {
+                Log.e("EDEN", throwable.toString())
+            }
+        }
+    }
+
+    private suspend fun insertToDb(articles: List<Article>?) {
+        articles?.let {
+            articleDao.insert(it)
+        }
     }
 
 }

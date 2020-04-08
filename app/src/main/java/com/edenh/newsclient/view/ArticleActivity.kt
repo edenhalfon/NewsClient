@@ -2,6 +2,7 @@ package com.edenh.newsclient.view
 
 import android.os.Bundle
 import android.view.View
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
@@ -22,12 +23,14 @@ class ArticleActivity : AppCompatActivity(){
 
         articleWebView = article_content
         articleLoader = article_loader
+
         initWebView()
     }
 
     private fun initWebView() {
         val url = intent.getStringExtra(INTENT_ARTICLE_URL)
         articleWebView?.settings?.javaScriptEnabled = true
+        articleWebView?.settings?.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
         articleWebView?.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)

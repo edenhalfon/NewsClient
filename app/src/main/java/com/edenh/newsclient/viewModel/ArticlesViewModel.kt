@@ -1,22 +1,28 @@
 package com.edenh.newsclient.viewModel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.*
 import com.edenh.newsclient.model.Article
 import com.edenh.newsclient.network.response.ArticlesResponse
 import com.edenh.newsclient.repository.ArticlesRepository
+import com.edenh.newsclient.repository.ArticlesRoomDatabase
 import com.edenh.newsclient.utils.ARTICLES_SOURCE
 import com.edenh.newsclient.utils.GENERAL_FAILURE
 import com.edenh.newsclient.utils.NETWORK_FAILURE
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class ArticlesViewModel : ViewModel() {
+class ArticlesViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val articleRepository = ArticlesRepository()
-
+    private val articleRepository: ArticlesRepository
     private val errorLiveData: MutableLiveData<String> = MutableLiveData()
     private val articlesLiveData: MediatorLiveData<List<Article>> = MediatorLiveData()
+
+    init {
+        val articleDao = ArticlesRoomDatabase.getDatabase(application).articleDao()
+        articleRepository = ArticlesRepository(articleDao)
+    }
 
     fun getArticlesLiveData(): LiveData<List<Article>> {
         return articlesLiveData
@@ -28,7 +34,7 @@ class ArticlesViewModel : ViewModel() {
 
     fun fetchArticles() {
         val articlesResponse: LiveData<ArticlesResponse?> =
-            articleRepository.getArticles(ARTICLES_SOURCE)
+            articleRepository.getArticles()
         articlesLiveData.addSource(articlesResponse) {
             if (it != null) {
                 val status: String = it.status.toString()
