@@ -1,6 +1,7 @@
 package com.edenh.newsclient.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
@@ -60,6 +61,7 @@ class MainActivity : AppCompatActivity() {
                     articlesList?.adapter = adapter
                 } else {
                     adapter?.articlesData = it
+                    adapter?.notifyDataSetChanged()
                 }
 
             } else {

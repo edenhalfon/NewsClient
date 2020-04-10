@@ -14,9 +14,17 @@ import com.edenh.newsclient.R
 import com.edenh.newsclient.model.Article
 import com.edenh.newsclient.utils.INTENT_ARTICLE_URL
 import com.edenh.newsclient.view.ArticleActivity
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ArticlesAdapter(var articlesData: List<Article>) :
     RecyclerView.Adapter<ArticlesAdapter.ArticleViewHolder>() {
+
+    private val dataDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    private val expectedDateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm")
+    init {
+        dataDateFormat.timeZone = TimeZone.getTimeZone("GMT")
+    }
 
     private val requestOptions: RequestOptions = RequestOptions()
         .placeholder(R.drawable.ic_place_holder)
@@ -34,10 +42,10 @@ class ArticlesAdapter(var articlesData: List<Article>) :
         holder.description.text = article.description
 
         if (TextUtils.isEmpty(article.author)) {
-            holder.authorAndPublishDate.text = article.publishedAt
+            holder.authorAndPublishDate.text = convertDatePattern(article.publishedAt)
         } else {
             holder.authorAndPublishDate.text = holder.authorAndPublishDate.context
-                .getString(R.string.author_date_template, article.author, article.publishedAt)
+                .getString(R.string.author_date_template, article.author, convertDatePattern(article.publishedAt))
         }
 
         Glide.with(holder.coverImage.context)
@@ -54,6 +62,19 @@ class ArticlesAdapter(var articlesData: List<Article>) :
 
     override fun getItemCount(): Int {
         return articlesData.size
+    }
+
+    fun convertDatePattern(date: String?, dateFormat: SimpleDateFormat = this.dataDateFormat): String {
+        if (date.isNullOrEmpty()) {
+            return ""
+        }
+        val parsedDate = dateFormat.parse(date)
+
+        if (parsedDate != null) {
+            return expectedDateFormat.format(parsedDate)
+        }
+
+        return ""
     }
 
     class ArticleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
