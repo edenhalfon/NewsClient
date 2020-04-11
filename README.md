@@ -2,7 +2,7 @@
 This project fetch articles from NewsApi and show them in RecyclerView and than opening it inside another activity with WebView.
 
 # Technologies & Methodologies
-  * ModelView View Model (MVVM) - using LiveData and AndroidViewModel.
+  * Model View View-Model (MVVM) - using LiveData and AndroidViewModel.
   * Room as persistent storage in order to support no connection situations.
   * Retrofit for network client.
   * Tests - Unit Tests & Espresso for UI tests and Junit. 
