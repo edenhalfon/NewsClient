@@ -75,7 +75,6 @@ class MainActivity : AppCompatActivity() {
 
         articlesViewModel.getErrorLiveData()?.observe(this, Observer {
             articlesLoader?.visibility = View.GONE
-            articlesList?.visibility = View.GONE
 
             when (it) {
                 GENERAL_FAILURE -> "Something went wrong..."
@@ -88,7 +87,7 @@ class MainActivity : AppCompatActivity() {
                     Snackbar.LENGTH_INDEFINITE
                 ).setAction("Retry") {
                     articlesLoader?.visibility = View.VISIBLE
-                    articlesViewModel?.fetchArticles()
+                    articlesViewModel.fetchArticles()
                 }.show()
             }
         })

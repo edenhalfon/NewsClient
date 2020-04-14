@@ -1,22 +1,23 @@
 package com.edenh.newsclient.viewModel
 
 import android.app.Application
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.viewModelScope
 import com.edenh.newsclient.model.Article
-import com.edenh.newsclient.network.response.ArticlesResponse
 import com.edenh.newsclient.repository.ArticlesRepository
 import com.edenh.newsclient.repository.ArticlesRoomDatabase
-import com.edenh.newsclient.utils.ARTICLES_SOURCE
 import com.edenh.newsclient.utils.GENERAL_FAILURE
 import com.edenh.newsclient.utils.NETWORK_FAILURE
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class ArticlesViewModel(application: Application) : AndroidViewModel(application) {
 
     private val articleRepository: ArticlesRepository
-    private val errorLiveData: MutableLiveData<String> = MutableLiveData()
+    private val errorLiveData: MediatorLiveData<String> = MediatorLiveData()
     private val articlesLiveData: MediatorLiveData<List<Article>> = MediatorLiveData()
 
     init {
@@ -33,17 +34,23 @@ class ArticlesViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun fetchArticles() {
-        val articlesResponse: LiveData<ArticlesResponse?> =
-            articleRepository.getArticles()
-        articlesLiveData.addSource(articlesResponse) {
+        articlesLiveData.addSource(articleRepository.getArticles()) {
             if (it != null) {
-                val status: String = it.status.toString()
+                articlesLiveData.value = it.articles
+            }
+        }
+
+        val error = viewModelScope.async(Dispatchers.IO) {
+            articleRepository.fetchAndInsertArticles()
+        }
+
+        viewModelScope.launch(Dispatchers.Main) {
+            errorLiveData.addSource(error.await()) {
+                val status: String = it?.status.toString()
                 if (NETWORK_FAILURE == status
                     || GENERAL_FAILURE == status
                 ) {
-                    errorLiveData.postValue(status)
-                } else {
-                    articlesLiveData.setValue(it.articles)
+                    errorLiveData.value = status
                 }
             }
         }

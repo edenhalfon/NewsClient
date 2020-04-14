@@ -10,7 +10,7 @@ import com.edenh.newsclient.model.Article
 @Dao
 interface ArticleDao {
 
-    @Query("SELECT * from article_table")
+    @Query("SELECT * from article_table ORDER BY publishedAt DESC")
     fun getArticles(): LiveData<List<Article>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
