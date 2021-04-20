@@ -8,6 +8,6 @@ This project fetch articles from NewsApi and show them in RecyclerView and than 
   * Tests - Unit Tests & Espresso for UI tests and Junit. 
 
 
-![Project Structure](https://codelabs.developers.google.com/codelabs/android-room-with-a-view-kotlin/img/a7da8f5ea91bac52.png)
+![Project Structure](https://res.cloudinary.com/practicaldev/image/fetch/s--UxW69rdg--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/i/yxk8akawka6rctphk0cq.png)
 
 The project also support WebView caching and showing articles although there is no connection.
